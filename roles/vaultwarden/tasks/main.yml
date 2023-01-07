@@ -1,0 +1,22 @@
+- name: Create vaultwarden volume
+  docker_volume:
+    name: vaultwdata
+    driver: local
+- name: Run vaultwarden container
+  community.docker.docker_container:
+    name: "{{ vaultwarden_hostname }}"
+    image: "{{ vaultwarden_image }}"
+    memory: "{{ vaultwarden_memory }}"
+    env:
+      WEBSOCKET_ENABLED: "true"
+      ADMIN_TOKEN: "{{ vaultwarden_admin_password }}"
+    volumes:
+      - "vaultwdata:/data/:rw"
+    ports:
+      - 8888:80  
+    networks:
+      - name: "{{ network_name }}"
+    #log_driver: "{{ log_driver }}"
+    #log_options:
+    #  max-size: "{{ log_max_size }}"
+    #  max-file: "{{ log_max_file }}"

@@ -1,0 +1,13 @@
+#docker_vm group vars
+network_name: vault-net
+network_subnet: 172.24.3.0/24
+
+vaultwarden_image: vaultwarden/server:1.27.0-alpine
+vaultwarden_hostname: vaultwarden
+vaultwarden_memory: 128m
+
+
+nginx_image: nginx:1.23.3
+nginx_hostname: nginx_proxy
+nginx_memory: 256m
+nginx_conf_dir: /usr/share/nginx/

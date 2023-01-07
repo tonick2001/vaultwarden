@@ -1,0 +1,38 @@
+# - name: Create nginx volume
+#   docker_volume:
+#     name: vaultwdata
+#     driver: local
+- name: Create nginx conf dir
+  file:
+    path: "{{ nginx_conf_dir }}"
+    state: directory
+- name: Copy nginx conf
+  become: true
+  template: src={{ item.src }} dest={{ item.dest }}
+  with_items:
+    - { src: 'templates/default.conf', dest: '/{{ nginx_conf_dir }}/default.conf' }
+    - { src: 'templates/ssl/private/nginx-selfsigned.key', dest: '/{{ nginx_conf_dir }}/nginx-selfsigned.key' }
+    - { src: 'templates/ssl/public/nginx-selfsigned.crt', dest: '/{{ nginx_conf_dir }}/nginx-selfsigned.crt' }
+    - { src: 'templates/snippets/self-signed.conf', dest: '/{{ nginx_conf_dir }}/self-signed.conf' }
+  notify: Restart nginx container
+- name: Run nginx container
+  community.docker.docker_container:
+    name: "{{ nginx_hostname }}"
+    image: "{{ nginx_image }}"
+    memory: "{{ nginx_memory }}"
+    
+    volumes:
+      - "{{ nginx_conf_dir }}default.conf:/etc/nginx/conf.d/default.conf:rw"
+      - "{{ nginx_conf_dir }}nginx-selfsigned.key:/etc/nginx/nginx-selfsigned.key:ro"
+      - "{{ nginx_conf_dir }}nginx-selfsigned.crt:/etc/nginx/nginx-selfsigned.crt:ro"
+      - "{{ nginx_conf_dir }}self-signed.conf:/etc/nginx/snippets/self-signed.conf:ro"
+
+    ports:
+      - 80:80
+      - 443:443
+    networks:
+      - name: "{{ network_name }}"
+    #log_driver: "{{ log_driver }}"
+    #log_options:
+    #  max-size: "{{ log_max_size }}"
+    #  max-file: "{{ log_max_file }}"

@@ -1,0 +1,24 @@
+# Добавляем ключ
+- name: Add Docker GPG apt Key
+  ansible.builtin.apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+# Добавляем репозиторий
+- name: Add Docker Repository
+  ansible.builtin.apt_repository:
+    repo: deb https://download.docker.com/linux/ubuntu focal stable
+    state: present
+- name: Update apt and install docker-ce
+  ansible.builtin.apt:
+    name: docker-ce
+    state: present
+    update_cache: true
+- name: Install Docker Module for Python
+  ansible.builtin.pip:
+    name: docker
+- name: Create docker Network for ELK
+  community.docker.docker_network:
+    name: "{{ network_name }}"
+    ipam_config:
+      - subnet: "{{ network_subnet }}"
+    state: present
